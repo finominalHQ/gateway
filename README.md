@@ -21,6 +21,9 @@ Gateway is a L7 proxy service for a microservice/distributed system. It provides
 - Request|Response Mutation: rewriting of 'scheme', 'URI', 'host', and adding or deleting the value of the request header of the forwarding request
 - Request shadowing
 
+### How It Works
+- Force all request to SSL by default
+- Translate response
 ### Resources
 https://github.com/motiv-labs/janus
 https://www.krakend.io/docs/overview

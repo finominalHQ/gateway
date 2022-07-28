@@ -14,11 +14,11 @@ import (
 // Route is used by pop to map your routes database table to your go code.
 type Route struct {
 	ID        uuid.UUID    `json:"id" db:"id"`
-	Name      string       `json:"name" db:"name"`
+	Name      nulls.String `json:"name" db:"name"`
 	Desc      nulls.String `json:"desc" db:"desc"`
 	Method    string       `json:"method" db:"method"`
 	Host      string       `json:"host" db:"host"`
-	Port      string       `json:"port" db:"port"`
+	Port      nulls.String `json:"port" db:"port"`
 	Service   nulls.String `json:"service" db:"service"`
 	Resource  nulls.String `json:"resource" db:"resource"`
 	Action    nulls.String `json:"action" db:"action"`
@@ -26,9 +26,10 @@ type Route struct {
 	Body      util.Json    `json:"body" db:"body"`
 	Header    util.Json    `json:"header" db:"header"`
 	Config    util.Json    `json:"config" db:"config"`
-	Type      string       `json:"type" db:"type"`
-	Status    string       `json:"status" db:"status"`
-	Backend   util.Json    `json:"backend" db:"backend"`
+	Auth      AuthType     `json:"auth" db:"auth"`
+	Type      TypeType     `json:"type" db:"type"`
+	Status    StatusType   `json:"status" db:"status"`
+	Ref       string       `json:"backend" db:"backend"`
 	CreatedAt time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at" db:"updated_at"`
 }

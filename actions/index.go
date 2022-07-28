@@ -1,31 +1,16 @@
 package actions
 
 import (
-	"gateway/locales"
-	"gateway/models"
 	"gateway/pkg/middlewares"
-	"net/http"
+	"gateway/pkg/util"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo-pop/v3/pop/popmw"
-	"github.com/gobuffalo/buffalo/render"
-	"github.com/gobuffalo/envy"
-	contenttype "github.com/gobuffalo/mw-contenttype"
-	forcessl "github.com/gobuffalo/mw-forcessl"
-	i18n "github.com/gobuffalo/mw-i18n/v2"
-	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gobuffalo/x/sessions"
 	"github.com/rs/cors"
-	"github.com/unrolled/secure"
 )
-
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = envy.Get("GO_ENV", "development")
 
 var (
 	app *buffalo.App
-	T   *i18n.Translator
 )
 
 // App is where all routes and middleware for buffalo
@@ -44,7 +29,7 @@ var (
 func App() *buffalo.App {
 	if app == nil {
 		app = buffalo.New(buffalo.Options{
-			Env:          ENV,
+			Env:          util.ENV,
 			SessionStore: sessions.Null{},
 			PreWares: []buffalo.PreWare{
 				cors.Default().Handler,
@@ -53,66 +38,32 @@ func App() *buffalo.App {
 		})
 
 		// Automatically redirect to SSL
-		app.Use(forceSSL())
+		app.Use(middlewares.ForceSSL())
+
+		// Automatically redirect to SSL
+		app.Use(middlewares.Translations())
 
 		// Log request parameters (filters apply).
-		app.Use(paramlogger.ParameterLogger)
+		app.Use(middlewares.Logger())
 
-		// Set the request content type x JSON
-		app.Use(contenttype.Set("application/json"))
+		// Force content type to JSON
+		app.Use(middlewares.ForceContentType())
 
 		// Wraps each request in a transaction.
-		//   c.Value("tx").(*pop.Connection)
-		// Remove to disable this.
-		app.Use(popmw.Transaction(models.DB))
+		app.Use(middlewares.WrapWithTransaction())
 
-		// Attach custom metadata
-		// like route
+		// check for jwt token
+		app.Use(middlewares.VerifyJWT())
+
+		// global request throttle
+		app.Use(middlewares.Throttler())
+
+		// Attach incoming route to route
 		app.Use(middlewares.AttachMetadata())
 
-		app.GET("/", HomeHandler)
+		// fall back response handler
+		app.Use(middlewares.Fallback())
 	}
 
 	return app
-}
-
-// translations will load locale files, set up the translator `actions.T`,
-// and will return a middleware to use to load the correct locale for each
-// request.
-// for more information: https://gobuffalo.io/en/docs/localization
-func translations() buffalo.MiddlewareFunc {
-	var err error
-	if T, err = i18n.New(locales.FS(), "en-US"); err != nil {
-		app.Stop(err)
-	}
-	return T.Middleware()
-}
-
-// forceSSL will return a middleware that will redirect an incoming request
-// if it is not HTTPS. "http://example.com" => "https://example.com".
-// This middleware does **not** enable SSL. for your application. To do that
-// we recommend using a proxy: https://gobuffalo.io/en/docs/proxy
-// for more information: https://github.com/unrolled/secure/
-func forceSSL() buffalo.MiddlewareFunc {
-	return forcessl.Middleware(secure.Options{
-		SSLRedirect:     ENV == "production",
-		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-	})
-}
-
-var R *render.Engine
-
-func init() {
-	R = render.New(render.Options{
-		DefaultContentType: "application/json",
-	})
-}
-
-// HomeHandler is a default handler to serve up
-// a home page.
-func HomeHandler(c buffalo.Context) error {
-	println("pre-routex")
-	println(c.Value("routex").(string))
-	println("post-routex")
-	return c.Render(http.StatusOK, R.JSON(map[string]string{"message": "Welcome to Buffalo!"}))
 }

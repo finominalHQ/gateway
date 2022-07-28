@@ -1,3 +1,11 @@
 # For more information on using i18n see: https://github.com/nicksnyder/go-i18n
 - id: welcome_greeting
   translation: "Welcome to Buffalo (EN)"
+
+- id: messages-notification
+  translation:
+    one: "You have {{.Count}} notification"
+    other: "You have {{.Count}} notifications"
+
+- id: auth.transaction.load.failed
+  translation: "Unable to load transaction for this request"
