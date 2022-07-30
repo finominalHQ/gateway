@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"gateway/pkg/controllers"
 	"gateway/pkg/middlewares"
 	"gateway/pkg/util"
 
@@ -40,16 +41,16 @@ func App() *buffalo.App {
 		// Automatically redirect to SSL
 		app.Use(middlewares.ForceSSL())
 
-		// Automatically redirect to SSL
+		// Initialise i18n
 		app.Use(middlewares.Translations())
 
-		// Log request parameters (filters apply).
+		// Log request parameters (filters apply)
 		app.Use(middlewares.Logger())
 
 		// Force content type to JSON
 		app.Use(middlewares.ForceContentType())
 
-		// Wraps each request in a transaction.
+		// Wraps each request in a db transaction
 		app.Use(middlewares.WrapWithTransaction())
 
 		// check for jwt token
@@ -59,10 +60,18 @@ func App() *buffalo.App {
 		app.Use(middlewares.Throttler())
 
 		// Attach incoming route to route
-		app.Use(middlewares.AttachMetadata())
+		app.Use(middlewares.GetIncomingRoute())
 
-		// fall back response handler
-		app.Use(middlewares.Fallback())
+		// Attach outgoing route to route
+		app.Use(middlewares.GetOutgoingRoute())
+
+		// Attempt reverse proxy
+		app.Use(middlewares.Proxy(app.Context))
+
+		// register local routes
+		app.GET("health", controllers.Health)
+		app.GET("fallback", controllers.Fallback)
+
 	}
 
 	return app

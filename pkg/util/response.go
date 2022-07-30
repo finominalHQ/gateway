@@ -17,8 +17,8 @@ func init() {
 
 func Response(c buffalo.Context, status int, title, message string, data, meta any) error {
 	return c.Render(status, R.JSON(map[string]any{
-		"title":   title,
-		"message": message,
+		"title":   T(c, title),
+		"message": T(c, message),
 		"data":    data,
 		"meta":    meta,
 	}))

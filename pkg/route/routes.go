@@ -49,7 +49,7 @@ func (v RoutesResource) List(c buffalo.Context) error {
 	}
 
 	return responder.Wants("json", func(c buffalo.Context) error {
-		return util.Success(c, "Route", "List of routes", routes, map[string]any{
+		return util.Success(c, "gateway.route.list.title", "gateway.route.list.message", routes, map[string]any{
 			"page":     c.Param(pop.PaginatorPageKey),
 			"per_page": c.Param(pop.PaginatorPerPageKey),
 			"total":    len(*routes),
@@ -75,7 +75,7 @@ func (v RoutesResource) Show(c buffalo.Context) error {
 	}
 
 	return responder.Wants("json", func(c buffalo.Context) error {
-		return util.Success(c, "Route", "Route details", route, nil)
+		return util.Success(c, "gateway.route.item.title", "gateway.route.item.message", route, nil)
 	}).Respond(c)
 }
 
@@ -104,12 +104,12 @@ func (v RoutesResource) Create(c buffalo.Context) error {
 
 	if verrs.HasAny() {
 		return responder.Wants("json", func(c buffalo.Context) error {
-			return util.Error(c, "Route", "Unable to process request", http.StatusUnprocessableEntity, verrs)
+			return util.Error(c, "gateway.route.create.error.title", "gateway.route.create.error.message", http.StatusUnprocessableEntity, verrs)
 		}).Respond(c)
 	}
 
 	return responder.Wants("json", func(c buffalo.Context) error {
-		return util.Success(c, "Route", "Route created successfully", route, nil)
+		return util.Success(c, "gateway.route.create.title", "gateway.route.create.message", route, nil)
 	}).Respond(c)
 }
 
@@ -141,12 +141,12 @@ func (v RoutesResource) Update(c buffalo.Context) error {
 
 	if verrs.HasAny() {
 		return responder.Wants("json", func(c buffalo.Context) error {
-			return util.Error(c, "Route", "Unable to process request", http.StatusUnprocessableEntity, verrs)
+			return util.Error(c, "gateway.route.update.error.title", "gateway.route.update.error.message", http.StatusUnprocessableEntity, verrs)
 		}).Respond(c)
 	}
 
 	return responder.Wants("json", func(c buffalo.Context) error {
-		return util.Success(c, "Route", "Route created successfully", route, nil)
+		return util.Success(c, "gateway.route.update.title", "gateway.route.update.message", route, nil)
 	}).Respond(c)
 }
 
@@ -172,6 +172,6 @@ func (v RoutesResource) Destroy(c buffalo.Context) error {
 	}
 
 	return responder.Wants("json", func(c buffalo.Context) error {
-		return util.Success(c, "Route", "Route created successfully", route, nil)
+		return util.Success(c, "gateway.route.delete.title", "gateway.route.delete.message", route, nil)
 	}).Respond(c)
 }

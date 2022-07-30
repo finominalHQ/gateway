@@ -10,10 +10,7 @@ import (
 func Fallback() buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			// println("pre-routex")
-			// println(c.Value("routex").(string))
-			// println("post-routex")
-			return util.Error(c, "Fallback Response", "Unable to find a matching record", http.StatusNotFound, nil)
+			return util.Error(c, "gateway.local.fallback.error.title", "gateway.local.fallback.error.message", http.StatusNotFound, nil)
 		}
 	}
 }

@@ -18,12 +18,12 @@ func (f *Json) Scan(value any) error {
 	return json.Unmarshal(data, &f)
 }
 
-func JsonParse(d any) []byte {
+func JsonStringify(d any) []byte {
 	result, _ := json.Marshal(d)
 	return result
 }
 
-func JsonStringify(b []byte, d any) any {
+func JsonParse(b []byte, d any) any {
 	json.Unmarshal(b, d)
 
 	return d

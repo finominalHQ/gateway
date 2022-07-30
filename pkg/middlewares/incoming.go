@@ -1,65 +1,33 @@
 package middlewares
 
 import (
+	"fmt"
+	"gateway/pkg/cache"
 	"gateway/pkg/route"
 	"gateway/pkg/util"
-	"net/http"
 	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
 )
 
-func AttachMetadata() buffalo.MiddlewareFunc {
+func GetIncomingRoute() buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			tx, ok := c.Value("tx").(*pop.Connection)
 			if !ok {
-				return util.Error(c, "Auth", util.T(c, "auth.transaction.load.failed"), 0, nil)
+				return util.Error(c, "gateway.route.show.error.title", "gateway.route.show.error.message", 0, nil)
 			}
 
-			// Allocate an empty Route
-			r := &route.Route{}
+			req := c.Request()
 
-			// To find the Route the parameter route_id is used.
-			method := c.Request().Method
-			host := c.Request().URL.Host
-			port := c.Request().URL.Port()
-			paths := strings.Split(c.Request().URL.Path, "")
-
-			query := "type = '" + route.INCOMING + "' and status = 'incoming' and method = ? and host = ? and port = ?"
-
-			service := "and service is null"
-			if len(paths) > 0 {
-				service = "and service = " + paths[0]
-			}
-			query = query + service
-
-			resource := "and resource is null"
-			if len(paths) > 1 {
-				resource = "and resource = " + paths[1]
-			}
-			query = query + resource
-
-			action := "and action is null"
-			if len(paths) > 2 {
-				action = "and action = " + paths[2]
-			}
-			query = query + action
-
-			if err := tx.Where(
-				query,
-				method,
-				host,
-				port,
-				service,
-				resource,
-				action,
-			).First(r); err != nil {
-				return c.Error(http.StatusNotFound, err)
+			key := fmt.Sprintf("gateway:route:%s:%s-%s-%s-%s", route.OUTGOING, req.Method, req.URL.Host, req.URL.Port(), strings.ReplaceAll(req.URL.Path, "/", "-"))
+			incomingRoute := cache.Get(key).(*route.Route)
+			if incomingRoute == nil {
+				incomingRoute = route.GetIncomingRoute(req, tx)
 			}
 
-			c.Set("incomingRoute", r)
+			c.Set("incomingRoute", incomingRoute)
 
 			return next(c)
 		}

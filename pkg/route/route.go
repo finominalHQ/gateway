@@ -2,7 +2,11 @@ package route
 
 import (
 	"encoding/json"
+	"fmt"
+	"gateway/pkg/cache"
 	"gateway/pkg/util"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gobuffalo/nulls"
@@ -65,4 +69,64 @@ func (r *Route) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
 // This method is not required and may be deleted.
 func (r *Route) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
+}
+
+func (r *Route) AfterSave(tx *pop.Connection) error {
+	key := fmt.Sprintf("gateway:route:%s:%s-%s-%s-%s-%s-%s", r.Type, r.Method, r.Host, r.Port.String, r.Service.String, r.Resource.String, r.Action.String)
+	cache.Set(key, r, -1)
+	return nil
+}
+
+func GetIncomingRoute(req *http.Request, tx *pop.Connection) *Route {
+	method := req.Method
+	host := req.URL.Host
+	port := req.URL.Port()
+	paths := strings.Split(req.URL.Path, "")
+
+	query := "type = '" + INCOMING + "' and status = '" + ACTIVE + "' and method = ? and host = ? and port = ?"
+
+	service := "and service is null"
+	if len(paths) > 0 {
+		service = "and (service = " + paths[0] + " or service is null)"
+	}
+	query = query + service
+
+	resource := "and resource is null"
+	if len(paths) > 1 {
+		resource = "and resource = " + paths[1]
+	}
+	query = query + resource
+
+	action := "and action is null"
+	if len(paths) > 2 {
+		action = "and action = " + paths[2]
+	}
+	query = query + action
+
+	r := &Route{}
+	if err := tx.Where(
+		query,
+		method,
+		host,
+		port,
+		service,
+		resource,
+		action,
+	).First(r); err != nil {
+		return nil
+	}
+
+	return r
+}
+
+func GetOutgoingRoute(incoming *Route, tx *pop.Connection) *Route {
+	r := &Route{}
+	if err := tx.Where(
+		"type = '"+INCOMING+"' and status = '"+ACTIVE+"' and ref = ?",
+		incoming.Ref,
+	).First(r); err != nil {
+		return nil
+	}
+
+	return r
 }
