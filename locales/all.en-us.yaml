@@ -9,3 +9,15 @@
 
 - id: auth.transaction.load.failed
   translation: "Unable to load transaction for this request"
+
+- id: gateway.app.404.error.title
+  translation: "Not Found"
+
+- id: gateway.app.404.error.message
+  translation: "Not Found"
+
+- id: gateway.local.health.title
+  translation: "Health Check"
+
+- id: gateway.local.health.message
+  translation: "Health check across registered services"

@@ -34,9 +34,15 @@ func App() *buffalo.App {
 			SessionStore: sessions.Null{},
 			PreWares: []buffalo.PreWare{
 				cors.Default().Handler,
+				middlewares.ProxyHandler, // proxy before buffalo loads
 			},
 			SessionName: "_gateway_session",
 		})
+
+		app.ErrorHandlers[404] = controllers.Error404()
+
+		// Force content type to JSON
+		app.Use(middlewares.ForceContentType())
 
 		// Automatically redirect to SSL
 		app.Use(middlewares.ForceSSL())
@@ -53,24 +59,11 @@ func App() *buffalo.App {
 		// Wraps each request in a db transaction
 		app.Use(middlewares.WrapWithTransaction())
 
-		// check for jwt token
-		app.Use(middlewares.VerifyJWT())
-
 		// global request throttle
 		app.Use(middlewares.Throttler())
 
-		// Attach incoming route to route
-		app.Use(middlewares.GetIncomingRoute())
-
-		// Attach outgoing route to route
-		app.Use(middlewares.GetOutgoingRoute())
-
-		// Attempt reverse proxy
-		app.Use(middlewares.Proxy(app.Context))
-
 		// register local routes
-		app.GET("health", controllers.Health)
-		app.GET("fallback", controllers.Fallback)
+		app.GET("/health", controllers.Health)
 
 	}
 

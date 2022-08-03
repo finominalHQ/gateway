@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.28, for macos12.2 (arm64)
+-- MySQL dump 10.13  Distrib 8.0.29, for macos12.4 (arm64)
 --
--- Host: 127.0.0.1    Database: chi_gateway
+-- Host: 127.0.0.1    Database: f_gateway
 -- ------------------------------------------------------
--- Server version	8.0.28
+-- Server version	8.0.29
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,21 +24,17 @@ DROP TABLE IF EXISTS `routes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `routes` (
   `id` char(36) NOT NULL,
-  `name` varchar(26) NOT NULL,
+  `name` varchar(26) DEFAULT NULL,
   `desc` varchar(255) DEFAULT NULL,
-  `method` varchar(26) NOT NULL,
-  `host` varchar(52) NOT NULL,
-  `port` varchar(26) NOT NULL DEFAULT '80',
-  `service` varchar(26) DEFAULT NULL,
-  `resource` varchar(26) DEFAULT NULL,
-  `action` varchar(26) DEFAULT NULL,
+  `pattern` varchar(255) NOT NULL,
+  `upstream` varchar(255) NOT NULL,
   `query` text,
   `body` text,
   `header` text,
   `config` text,
-  `type` varchar(26) NOT NULL,
-  `status` varchar(26) NOT NULL,
-  `backend` text NOT NULL,
+  `auth` varchar(26) DEFAULT NULL,
+  `type` varchar(26) DEFAULT NULL,
+  `status` varchar(26) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
@@ -67,4 +63,4 @@ CREATE TABLE `schema_migration` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-07-17 14:17:51
+-- Dump completed on 2022-08-03 20:49:45

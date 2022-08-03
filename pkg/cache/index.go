@@ -29,7 +29,7 @@ var Cache = &client
 func Get(key string) any {
 	value, err := client.Get(ctx, key).Result()
 	if err != nil {
-		return redis.Nil
+		return nil
 	}
 
 	return value

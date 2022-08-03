@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gateway/pkg/route"
 	"gateway/pkg/util"
+	"net/http"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
@@ -23,14 +24,13 @@ func Health(c buffalo.Context) error {
 	}
 
 	for _, r := range *routes {
-		url := fmt.Sprintf("%s:%s/%s/%s", r.Host, r.Port.String, r.Resource.String, r.Action.String)
-		_, err := util.Request(r.Method, url, nil)
+		_, err := util.Request(http.MethodGet, r.Upstream, nil)
 
 		status := "Available"
 		if err != nil {
 			status = err.Error()
 		}
-		data[url] = status
+		data[r.Upstream] = status
 	}
 
 	return util.Success(c, "gateway.local.health.title", "gateway.local.health.message", data, nil)

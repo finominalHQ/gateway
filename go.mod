@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/alcalbg/buffalo-rate-limiter-mw v0.0.0-20200129135003-ee68cfbcec5f
+	github.com/go-redis/redis/v9 v9.0.0-beta.2
 	github.com/gobuffalo/buffalo v0.18.9
 	github.com/gobuffalo/buffalo-pop/v3 v3.0.6
 	github.com/gobuffalo/envy v1.10.1
@@ -11,7 +12,6 @@ require (
 	github.com/gobuffalo/mw-forcessl v1.0.1
 	github.com/gobuffalo/mw-i18n/v2 v2.0.2
 	github.com/gobuffalo/mw-paramlogger v1.0.1
-	github.com/gobuffalo/mw-tokenauth v1.0.1
 	github.com/gobuffalo/nulls v0.4.1
 	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/suite/v4 v4.0.2
@@ -37,7 +37,6 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-redis/redis/v9 v9.0.0-beta.2 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gobuffalo/events v1.4.2 // indirect
 	github.com/gobuffalo/fizz v1.14.2 // indirect
@@ -52,7 +51,6 @@ require (
 	github.com/gobuffalo/plush/v4 v4.1.14 // indirect
 	github.com/gobuffalo/refresh v1.13.1 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.3 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

@@ -7,12 +7,12 @@ Gateway is a L7 proxy service for a microservice/distributed system. It provides
 
 ### Features
 - HTTP L7 routing using request method, host, port and path only
-+ Enforce security like SSL and CORS by default
+- Enforce security like SSL and CORS by default
 + Allow request, response? mutation
 + Auto translate responses
 + Cache route definition in Redis for faster reads
 + Health checking for registered routes
-+ REST API, full access to the internals
+- REST API, full access to the internals
 
 ### Resources
 https://github.com/motiv-labs/janus

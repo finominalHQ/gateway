@@ -2,8 +2,7 @@ package route
 
 import (
 	"encoding/json"
-	"fmt"
-	"gateway/pkg/cache"
+	"gateway/models"
 	"gateway/pkg/util"
 	"net/http"
 	"strings"
@@ -20,12 +19,8 @@ type Route struct {
 	ID        uuid.UUID    `json:"id" db:"id"`
 	Name      nulls.String `json:"name" db:"name"`
 	Desc      nulls.String `json:"desc" db:"desc"`
-	Method    string       `json:"method" db:"method"`
-	Host      string       `json:"host" db:"host"`
-	Port      nulls.String `json:"port" db:"port"`
-	Service   nulls.String `json:"service" db:"service"`
-	Resource  nulls.String `json:"resource" db:"resource"`
-	Action    nulls.String `json:"action" db:"action"`
+	Pattern   string       `json:"pattern" db:"pattern"`
+	Upstream  string       `json:"upstream" db:"upstream"`
 	Query     util.Json    `json:"query" db:"query"`
 	Body      util.Json    `json:"body" db:"body"`
 	Header    util.Json    `json:"header" db:"header"`
@@ -33,7 +28,6 @@ type Route struct {
 	Auth      AuthType     `json:"auth" db:"auth"`
 	Type      TypeType     `json:"type" db:"type"`
 	Status    StatusType   `json:"status" db:"status"`
-	Ref       string       `json:"backend" db:"backend"`
 	CreatedAt time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at" db:"updated_at"`
 }
@@ -71,19 +65,24 @@ func (r *Route) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
-func (r *Route) AfterSave(tx *pop.Connection) error {
-	key := fmt.Sprintf("gateway:route:%s:%s-%s-%s-%s-%s-%s", r.Type, r.Method, r.Host, r.Port.String, r.Service.String, r.Resource.String, r.Action.String)
-	cache.Set(key, r, -1)
+func GetRoutesByService(service string, routes *Routes) error {
+	if err := models.DB.Where(
+		"name = ?",
+		service,
+	).All(routes); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func GetIncomingRoute(req *http.Request, tx *pop.Connection) *Route {
+func GetRequestRoute(req *http.Request) *Route {
 	method := req.Method
 	host := req.URL.Host
 	port := req.URL.Port()
 	paths := strings.Split(req.URL.Path, "")
 
-	query := "type = '" + INCOMING + "' and status = '" + ACTIVE + "' and method = ? and host = ? and port = ?"
+	query := "status = '" + ACTIVE + "' and method = ? and host = ? and port = ?"
 
 	service := "and service is null"
 	if len(paths) > 0 {
@@ -103,8 +102,8 @@ func GetIncomingRoute(req *http.Request, tx *pop.Connection) *Route {
 	}
 	query = query + action
 
-	r := &Route{}
-	if err := tx.Where(
+	route := &Route{}
+	if err := models.DB.Where(
 		query,
 		method,
 		host,
@@ -112,21 +111,9 @@ func GetIncomingRoute(req *http.Request, tx *pop.Connection) *Route {
 		service,
 		resource,
 		action,
-	).First(r); err != nil {
+	).First(route); err != nil {
 		return nil
 	}
 
-	return r
-}
-
-func GetOutgoingRoute(incoming *Route, tx *pop.Connection) *Route {
-	r := &Route{}
-	if err := tx.Where(
-		"type = '"+INCOMING+"' and status = '"+ACTIVE+"' and ref = ?",
-		incoming.Ref,
-	).First(r); err != nil {
-		return nil
-	}
-
-	return r
+	return route
 }
