@@ -86,9 +86,10 @@ func (p Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				// throw error
 			}
 
-			fmt.Println(parsedUrl.Host, parsedUrl.Scheme)
 			req.URL.Scheme = parsedUrl.Scheme
 			req.URL.Host = parsedUrl.Host // host:port
+
+			req.URL.Path = "/" + strings.Join(strings.Split(strings.Trim(r.URL.Path, "/"), "/")[1:], "/")
 		},
 	}
 
